@@ -1,0 +1,39 @@
+name: CI
+on:
+    push:
+      branches:
+        - main
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        
+        steps:
+          # Checkout code
+          - name: Checkout repository
+            uses: actions/checkout@v3
+            # Set up Java 21 (Temurin)
+          - name: Set up JDK 21
+            uses: actions/setup-java@v3
+            with:
+              distribution: temurin
+              java-version: '21'
+            # Set up Node.js for frontend (ensure Node is available for Cypress)
+          - name: Set up Node.js
+            uses: actions/setup-node@v3
+            with:
+              node-version: '20'
+        # Run Gradle tests (includes backend and frontend tests and Cypress)
+          - name: Build and Test
+            run: ./gradlew clean build --no-daemon
+          # Build Docker image
+          - name: Build Docker image
+            run: docker build -t arcjc/movie-picker:latest .
+          # Log in to Docker Hub (credentials from secrets)
+          - name: Docker Login
+            uses: docker/login-action@v3
+            with:
+              username: ${{ secrets.DOCKERHUB_USERNAME }}
+              password: ${{ secrets.DOCKERHUB_TOKEN }}
+          # Push Docker image
+          - name: Push Docker image
+            run: docker push arcjc/movie-picker:latest

@@ -1,0 +1,16 @@
+rootProject.name = 'WoWWebPortal'
+
+include("backend", "frontend")
+
+plugins {
+    java
+}
+allprojects {
+    // Set common group and version
+    group = "ts.net.fort-coho.picker"
+    version = "1.0.0"
+    // Configure Java 21 for all subprojects
+    tasks.withType<JavaCompile> {
+    options.release.set(21)
+    }
+}

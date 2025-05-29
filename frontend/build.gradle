@@ -1,0 +1,29 @@
+plugins {
+// Use the Gradle Node plugin to run npm tasks
+id("com.github.node-gradle.node") version "7.1.0"
+}
+node {
+version.set("20.24.0") // Node.js version
+npmVersion.set("9.6.0") // npm version
+download.set(true) // Download Node locally
+}
+// Task to install npm dependencies
+tasks.register<com.github.gradle.node.npm.task.NpmTask>("npmInstall") {
+args.set(listOf("install"))
+}
+// Task to build the React app (runs `npm run build`)
+tasks.register<com.github.gradle.node.npm.task.NpmTask>("buildReact") {
+dependsOn("npmInstall")
+args.set(listOf("run", "build"))
+}
+// Copy built static files into the backend's resources/static directory
+tasks.register<Copy>("copyFrontendDist") {
+dependsOn("buildReact")
+// Copy everything from frontend/build/ (Webpack output)
+from(layout.buildDirectory.dir("build"))
+into(file("../backend/src/main/resources/static"))
+}
+// Ensure that building this project also copies the static files
+tasks.named("build") {
+dependsOn("copyFrontendDist")
+}
